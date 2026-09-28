@@ -41,6 +41,10 @@ src/
 ## API
 Повний контракт: [docs/API_CONTRACT.md](docs/API_CONTRACT.md) · Задачі: [docs/BACKEND_TASKS.md](docs/BACKEND_TASKS.md) · Модулі фронту: [docs/FRONTEND_MODULES.md](docs/FRONTEND_MODULES.md)
 
+### Swagger UI
+
+Після отримання змін спочатку виконай `npm install`, щоб встановити нові пакети. Переконайся, що MongoDB запущена й `MONGO_URL` задано в `.env`, потім запусти сервер командою `npm run dev`. Документація `GET /api/locations` буде доступна за адресою http://localhost:4000/docs/. Специфікація: [docs/openapi/locations.yaml](docs/openapi/locations.yaml).
+
 ## Seed
 Завантаж 5 файлів `relax_map_db.*.json` з папки ТЗ у `src/db/seeds/`, перейменуй на `regions.json`, `location_types.json`, `users.json`, `feedbacks.json`, `locations.json` і виконай `npm run seed` (`-- --force` — перезалити).
 
