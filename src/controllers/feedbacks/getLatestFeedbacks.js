@@ -18,7 +18,9 @@ export const getLatestFeedbacks = async (req, res, next) => {
       Feedback.countDocuments(),
     ]);
 
-    res.status(200).json(buildPaginatedResponse({ items, totalItems, page, limit }));
+    res
+      .status(200)
+      .json(buildPaginatedResponse({ items, totalItems, page, limit }));
   } catch (error) {
     next(error);
   }
