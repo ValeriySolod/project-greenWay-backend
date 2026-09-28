@@ -11,8 +11,16 @@ export const createLocation = async (req, res, next) => {
       throw createHttpError(401, 'Unauthorized: User context is missing');
     }
 
+    if (!user?._id) {
+      throw createHttpError(401, 'Unauthorized: User context is missing');
+    }
+
+    if (!file) {
+      throw createHttpError(400, 'Image is required');
+    }
+
     const { name, description, coordinates, locationType, region } = body;
-    
+
     if (!name?.trim()) {
       throw createHttpError(400, 'Field name is required');
     }
@@ -46,8 +54,8 @@ export const createLocation = async (req, res, next) => {
       name: name.trim(),
       description: description?.trim(),
       coordinates: parsedCoordinates,
-      locationType: locationType.trim(), 
-      region: region.trim(),             
+      locationType: locationType.trim(),
+      region: region.trim(),
       ownerId: user._id,
       image: cloudinaryResult.secure_url,
     });
