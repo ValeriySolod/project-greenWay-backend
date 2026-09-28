@@ -11,10 +11,6 @@ export const createLocation = async (req, res, next) => {
       throw createHttpError(401, 'Unauthorized: User context is missing');
     }
 
-    if (!user?._id) {
-      throw createHttpError(401, 'Unauthorized: User context is missing');
-    }
-
     if (!file) {
       throw createHttpError(400, 'Image is required');
     }
