@@ -1,8 +1,202 @@
-# Власник: Вікторія (#44) — заміни заготовку повною документацією (зразок: locations.yaml)
 openapi: 3.0.3
 info:
   title: Greenway — Feedbacks
   version: 1.0.0
 servers:
   - url: /
-paths: {}
+paths:
+  /api/feedbacks:
+    get:
+      summary: Отримання списку відгуків
+      description: Повертає список відгуків із можливістю пагінації (page, limit).
+      parameters:
+        - name: page
+          in: query
+          description: Номер сторінки результатів
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            example: 1
+        - name: limit
+          in: query
+          description: Обмеження кількості результатів на сторінці
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 6
+            example: 6
+      responses:
+        '200':
+          description: Успішне отримання списку відгуків з пагінацією
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - page
+                  - limit
+                  - totalItems
+                  - totalPages
+                  - items
+                properties:
+                  page:
+                    type: integer
+                    example: 1
+                  limit:
+                    type: integer
+                    example: 6
+                  totalItems:
+                    type: integer
+                    example: 24
+                  totalPages:
+                    type: integer
+                    example: 4
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FeedbackResponse'
+    post:
+      summary: Створення нового відгуку
+      description: Додає новий відгук, прив'язує його до локації, автоматично підтягує ім'я користувача з сесії та перераховує середній рейтинг локації. (Приватний)
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - locationId
+                - rate
+                - description
+              properties:
+                locationId:
+                  type: string
+                  description: Ідентифікатор локації (MongoDB ObjectId)
+                  example: "64f1a2b3c4d5e6f7a8b9c0d2"
+                rate:
+                  type: number
+                  format: float
+                  description: Оцінка від 1 до 5
+                  minimum: 1
+                  maximum: 5
+                  example: 4.5
+                description:
+                  type: string
+                  description: Текст відгуку (від 1 до 200 символів)
+                  minLength: 1
+                  maxLength: 200
+                  example: "Чудове місце для відпочинку всією родиною!"
+      responses:
+        '201':
+          description: Відгук успішно створено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResponse'
+        '400':
+          description: Некоректні вхідні дані
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Validation error: description is required"
+        '401':
+          description: Неавторизований доступ (відсутня або недійсна кука сесії)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '404':
+          description: Локацію з вказаним locationId не знайдено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Location not found"
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: connect.sid
+  schemas:
+    FeedbackResponse:
+      type: object
+      required:
+        - _id
+        - rate
+        - description
+        - userName
+        - locationId
+        - createdAt
+        - updatedAt
+      properties:
+        _id:
+          type: string
+          description: Системний ідентифікатор відгуку в MongoDB
+          example: "64f1a2b3c4d5e6f7a8b9c0d1"
+        rate:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+          example: 4.5
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: "Чудове місце для відпочинку всією родиною!"
+        userName:
+          type: string
+          minLength: 2
+          maxLength: 32
+          description: Ім'я користувача (автоматично підтягується з req.user.name)
+          example: "Вікторія"
+        locationId:
+          type: object
+          required:
+            - _id
+            - name
+          properties:
+            _id:
+              type: string
+              example: "64f1a2b3c4d5e6f7a8b9c0d2"
+            name:
+              type: string
+              example: "Парк ім. Шевченка"
+          description: Об'єкт локації
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата і час створення документа
+          example: "2026-10-04T23:11:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата і час останнього оновлення документа
+          example: "2026-10-04T23:15:00Z"
